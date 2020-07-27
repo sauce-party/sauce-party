@@ -1,0 +1,17 @@
+{
+  "name": "sauce-party",
+  "version": "1.0.0",
+  "description": "Description template",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "got": "^11.5.1",
+    "uuid": "^8.2.0",
+    "ws": "^7.3.1"
+  }
+}
