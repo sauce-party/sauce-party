@@ -1,41 +1,18 @@
 const WebSocketServer = require("ws").Server
-const express = require('express')
-const http = require("http")
 const {v4: uuid} = require('uuid')
 const storage = require('./storage')
-const routes = require('./handlers')
 
 // Configuration constants
+const PORT = process.env.PORT || 3000
+const SCHEDULER_INTERVAL = 4500
 const TICKET_TTL = 20000
-
 const MAX_SESSIONS = 2
 
-const app = express()
-const server = http.createServer(app)
-
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-
-// HTTP routes
-app.all('/wd/hub*', async (req, res) => {
-    // Handle new session creation
-    if (req.url === '/wd/hub/session') {
-        return await routes.createSession(req, res)
-    }
-    // Handle remove session
-    if (req.method === 'DELETE' && req.url.match(/wd\/hub\/session\/(.+?)$/)) {
-        return await routes.removeSession(req, res)
-    }
-    // Handle regular WD requests
-    return await routes.commonRequest(req, res)
-})
-
 // Web Sockets
-const wss = new WebSocketServer({
-    'server': server,
-    'path': '/ws'
-});
+const options = {'path': '/ws', 'port': PORT}
+const wss = new WebSocketServer(options, () => console.log(`WSS has been started at ${PORT}`));
 
+// WS routes
 wss.on("connection", async (ws, request) => {
     console.log('New connection from: ' + request.connection.remoteAddress)
     await ws.send('heartbeat|60000')
@@ -53,14 +30,11 @@ wss.on("connection", async (ws, request) => {
     })
 });
 
-// Ignite Web server
-server.listen(3000)
-
 // Start scheduler
 setInterval(async () => {
-    storage.expire()
+    storage.expireTickets()
     while (storage.queue.length > 0 && storage.slots() <= MAX_SESSIONS) {
-        storage.expire()
+        storage.expireTickets()
         const ticket = {
             id: uuid(),
             expiration: Date.now() + TICKET_TTL
@@ -69,4 +43,4 @@ setInterval(async () => {
         await storage.queue.shift().send(`ticket|${ticket.id}|${TICKET_TTL}`)
     }
     console.log(`Tickets: ${storage.tickets.length}, Sessions: ${storage.sessions.length}`)
-}, 4500)
+}, SCHEDULER_INTERVAL)

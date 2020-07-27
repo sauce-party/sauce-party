@@ -1,0 +1,15 @@
+{
+  "name": "ws-app",
+  "version": "1.0.0",
+  "description": "Manages tickets distribution via WS chanel",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^7.3.1",
+    "uuid": "^8.2.0"
+  }
+}

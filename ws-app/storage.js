@@ -17,11 +17,10 @@ module.exports = {
     sessions: sessions,
 
     /**
-     * Removes expired tickets and abandoned sessions
+     * Removes expired tickets
      */
-    expire: function () {
+    expireTickets: function () {
         tickets.removeIf(item => item.expiration < Date.now())
-        sessions.removeIf(item => item.expiration && item.expiration < Date.now())
     },
 
     /**
