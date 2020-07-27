@@ -1,9 +1,11 @@
 const got = require('got')
 
-const url = 'none'
+if (!process.env.TARGET_URL) {
+    throw 'TARGET_URL environment variable must be defined'
+}
 
 module.exports = async function (payload) {
-    const target = url + payload.url
+    const target = process.env.TARGET_URL + payload.url
     // Remove middleware headers
     delete payload.headers['host']
     delete payload.headers['content-length']
