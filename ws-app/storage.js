@@ -1,33 +1,37 @@
-Array.prototype.removeIf = function (predicate) {
-    this.forEach((value, index) => {
-        if (predicate(value)) {
-            this.splice(index, 1)
-        }
-    })
-}
+const redis = require("redis")
+const {promisify} = require("util")
+const {REDIS_HOST, TICKET_TTL} = require('./settings')
 
-const queue = []
-const tickets = []
-const sessions = []
+const client = redis.createClient({host: REDIS_HOST});
+
+client.on('ready', () => console.info(`Connected to Redis at ${REDIS_HOST}:6379`));
+client.on('error', error => console.error(error));
 
 module.exports = {
 
-    queue: queue,
-    tickets: tickets,
-    sessions: sessions,
-
     /**
-     * Removes expired tickets
+     * Return the count of occupied slots
+     * @returns {number}
      */
-    expireTickets: function () {
-        tickets.removeIf(item => item.expiration < Date.now())
+    slots: async function () {
+        const keys = promisify(client.keys).bind(client)
+        try {
+            return (await keys('[ts]:*')).length
+        } catch {
+            console.error('Unable to determinate slots count')
+            return Number.POSITIVE_INFINITY
+        }
     },
 
     /**
-     * Return the count of locket slots
-     * @returns {number}
+     * Stores ticket id into storage
      */
-    slots: function () {
-        return tickets.length + sessions.length
+    addTicket: async function (ticket) {
+        const set = promisify(client.set).bind(client)
+        try {
+            await set([`t:${ticket}`, '0', 'PX', TICKET_TTL])
+        } catch {
+            console.error('Unable to add new ticket')
+        }
     }
 }
