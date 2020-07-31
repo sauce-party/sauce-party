@@ -28,5 +28,5 @@ module.exports = {
     /**
      * Port that will be used by socket server
      */
-    WS_PORT: process.env.WS_PORT || 3000
+    WS_PORT: process.env.WS_PORT || 80
 }

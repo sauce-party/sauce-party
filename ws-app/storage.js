@@ -30,6 +30,7 @@ module.exports = {
         const set = promisify(client.set).bind(client)
         try {
             await set([`t:${ticket}`, '0', 'PX', TICKET_TTL])
+            return true
         } catch {
             console.error('Unable to add new ticket')
         }
