@@ -1,13 +1,30 @@
 version: '3'
 services:
-  ws:
-    #    image: "sauce-party/ws-app:latest"
-    build: "./ws-app"
+  traefik:
+    image: traefik:v2.3
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true"
+      - "--accesslog"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
     ports:
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
       - "80:80"
-    environment:
-      REDIS_HOST: redis
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  ws:
+    build: "./ws-app"
+    environment:
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ws.rule=Headers(`Upgrade`, `websocket`)"
+      - "traefik.http.routers.ws.entrypoints=web"
