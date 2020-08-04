@@ -1,0 +1,13 @@
+version: '3'
+services:
+  ws:
+    #    image: "sauce-party/ws-app:latest"
+    build: "./ws-app"
+    ports:
+      - "80:80"
+    environment:
+      REDIS_HOST: redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
