@@ -22,9 +22,21 @@ services:
     build: "./ws-app"
     environment:
       REDIS_HOST: redis
+      TICKET_TTL: 180000
     depends_on:
       - redis
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ws.rule=Headers(`Upgrade`, `websocket`)"
       - "traefik.http.routers.ws.entrypoints=web"
+  http:
+    build: "./proxy-app"
+    environment:
+      REDIS_HOST: redis
+      TARGET_URL: https://grid-host
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.http.rule=PathPrefix(`/wd/hub`)"
+      - "traefik.http.routers.http.entrypoints=web"
