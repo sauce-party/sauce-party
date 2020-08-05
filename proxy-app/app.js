@@ -1,6 +1,6 @@
 const express = require('express')
-const storage = require('./storage')
 const routes = require('./handlers')
+const {PORT} = require('./settings')
 
 const app = express()
 app.use(express.json())
@@ -20,10 +20,4 @@ app.all('/wd/hub*', async (req, res) => {
 })
 
 // Ignite Web server
-app.listen(process.env.PORT || 3000)
-
-// Start scheduler
-setInterval(() => {
-    storage.expireSessions()
-    console.log(`Active sessions: ${storage.sessions.length}`)
-}, 4500)
+app.listen(PORT || 3000)

@@ -1,38 +1,30 @@
 const storage = require('./storage')
 const proxyRequest = require('./proxy')
-const {v4: uuid} = require('uuid')
-
-const SESSION_TTL = 120000
+const {SESSION_TTL} = require('./settings')
 
 async function createSession(req, res) {
     // Check ticket
-    // const ticketId = req.body.desiredCapabilities['ticket']
-    // const ticket = storage.tickets.find(item => item.id === ticketId)
-    // if (!ticket) {
-    //     res.statusCode = 401
-    //     res.json({
-    //         'status': 401,
-    //         'value': {
-    //             'message': 'Ticket is invalid or absent',
-    //             'error': 'Ticket is invalid or absent'
-    //         }
-    //     })
-    //     return res.end()
-    // }
-    // storage.tickets.removeIf(item => item === ticket)
-    // Book session slot
-    const session = {id: uuid()}
-    storage.sessions.push(session)
+    const ticketId = req.body.desiredCapabilities['ticket']
+    if (!await storage.book(ticketId)) {
+        res.statusCode = 401
+        res.json({
+            'status': 401,
+            'value': {
+                'message': 'Ticket is invalid or absent',
+                'error': 'Ticket is invalid or absent'
+            }
+        })
+        return res.end()
+    }
     // Create real session
     const response = await proxyRequest(req)
     const body = JSON.parse(response.body)
     // Update slot with session id and expiration time
     const id = body.value.sessionId
     if (id) {
-        session.id = id
-        session.expiration = Date.now() + SESSION_TTL
+        await storage.upgrade(ticketId, id)
     } else {
-        session.expiration = Date.now() - SESSION_TTL
+        await storage.remove(ticketId)
     }
     // Response to client
     res.json(body)
@@ -54,7 +46,7 @@ async function removeSession(req, res) {
         res.statusCode = quitResponse.statusCode
         res.statusMessage = quitResponse.statusMessage
         // Update storage
-        storage.sessions.removeIf(s => s.id === matchResult[1])
+        await storage.remove(matchResult[1])
         return res.end()
     }
 }
@@ -73,8 +65,7 @@ async function commonRequest(req, res) {
         return res.end()
     }
     // Check session exists
-    const session = storage.sessions.find(item => item.id === match[1])
-    if (!session) {
+    if (!await storage.renew(match[1], SESSION_TTL)) {
         res.statusCode = 401
         res.json({
             'status': 401,
@@ -89,14 +80,13 @@ async function commonRequest(req, res) {
     let response
     try {
         response = await proxyRequest(req)
-        session.expiration = Date.now() + SESSION_TTL
     } catch (e) {
         console.error(e)
         response = e.response
     }
-    res.send(response.body)
     res.statusCode = response.statusCode
     res.statusMessage = response.statusMessage
+    res.send(response.body)
 }
 
 module.exports = {
