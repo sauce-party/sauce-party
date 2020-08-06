@@ -11,7 +11,7 @@ const queue = []
 
 // WS routes
 wss.on("connection", async (ws, request) => {
-    console.log(`New connection from ${request.connection.remoteAddress}. Active connections: ${wss.clients.size}`)
+    console.log(`New connection has been accepted. Total: ${wss.clients.size}`)
     if (!await send(ws, `heartbeat|${settings.HEARTBEAT}`)) {
         return;
     }
