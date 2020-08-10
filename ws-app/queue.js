@@ -43,8 +43,10 @@ instance.available = async function* () {
 /**
  * Size of items in a queue that wait for tickets
  */
-instance.size = function () {
-    return queue.length
-}
+Object.defineProperty(instance, 'size', {
+    get: function () {
+        return queue.length
+    }
+});
 
 module.exports = instance

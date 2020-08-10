@@ -20,7 +20,7 @@ wss.on("connection", async (ws, request) => {
             return;
         }
         queue.add(ws)
-        await send(ws, `queued|${queue.size()}`)
+        await send(ws, `queued|${queue.size}`)
     })
     ws.on("close", () => console.log(`Client has been disconnected. Active connections: ${wss.clients.size}`))
 });
