@@ -14,14 +14,17 @@ wss.on("connection", async (ws, request) => {
     if (!await send(ws, `heartbeat|${settings.HEARTBEAT}`)) {
         return;
     }
+    // Message route, acceptable messages: session, session|context
     ws.on("message", async message => {
-        if (!message.match('^session$')) {
+        const match = message.match('^session(|\\|(.+?))$')
+        if (!match) {
             ws.terminate()
             return;
         }
-        queue.add(ws)
+        queue.add(ws, match[2])
         await send(ws, `queued|${queue.size}`)
     })
+    // Disconnected route
     ws.on("close", () => console.log(`Client has been disconnected. Active connections: ${wss.clients.size}`))
 });
 
@@ -33,8 +36,8 @@ async function send(ws, message) {
     try {
         await ws.send(message)
         return true
-    } catch {
-        console.error('Failed to send message to the client')
+    } catch (e) {
+        console.error('Failed to send message to the client', e)
     }
 }
 
