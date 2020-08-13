@@ -43,10 +43,10 @@ async function send(ws, message) {
 
 // Start scheduler
 setInterval(async () => {
-    for await (const ws of queue.available()) {
+    for await (const data of queue.available()) {
         const ticket = uuid()
-        if (await storage.addTicket(ticket)) {
-            await send(ws, `ticket|${ticket}|${settings.TICKET_TTL}`)
+        if (await storage.addTicket(ticket, data.context)) {
+            await send(data.socket, `ticket|${ticket}|${settings.TICKET_TTL}`)
         }
     }
 }, settings.SCHEDULER_INTERVAL)

@@ -36,7 +36,7 @@ instance.remove = function (ws) {
  */
 instance.available = async function* () {
     while (queue.length > 0 && await storage.slots() < MAX_SESSIONS) {
-        yield queue.shift().socket
+        yield queue.shift()
     }
 }
 

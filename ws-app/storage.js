@@ -11,12 +11,14 @@ module.exports = {
 
     /**
      * Return the count of occupied slots
+     *
+     * @param context defines slots search scope if passed
      * @returns {number}
      */
-    slots: async function () {
+    slots: async function (context) {
         const keys = promisify(client.keys).bind(client)
         try {
-            return (await keys('[ts]:*')).length
+            return (await keys(`[ts]:${context || '*'}:*`)).length
         } catch {
             console.error('Unable to determinate slots count')
             return Number.POSITIVE_INFINITY
@@ -26,10 +28,10 @@ module.exports = {
     /**
      * Stores ticket id into storage
      */
-    addTicket: async function (ticket) {
+    addTicket: async function (ticket, context) {
         const set = promisify(client.set).bind(client)
         try {
-            await set([`t:${ticket}`, '0', 'PX', TICKET_TTL])
+            await set([`t:${context || ''}:${ticket}`, '0', 'PX', TICKET_TTL])
             return true
         } catch {
             console.error('Unable to add new ticket')
