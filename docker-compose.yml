@@ -33,7 +33,7 @@ services:
     build: "./proxy-app"
     environment:
       REDIS_HOST: redis
-      TARGET_URL: https://grid-host
+      TARGET_URL: https://grid-url
     depends_on:
       - redis
     labels:

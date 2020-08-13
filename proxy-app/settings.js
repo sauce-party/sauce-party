@@ -18,5 +18,10 @@ module.exports = {
     /**
      * Maximum allowed time for session creation. Reaching it will release booked slot
      */
-    SESSION_CREATION_TIMEOUT: process.env.SESSION_CREATION_TIMEOUT || 180000
+    SESSION_CREATION_TIMEOUT: process.env.SESSION_CREATION_TIMEOUT || 180000,
+
+    /**
+     * Hub url that will be used for calls delegation
+     */
+    TARGET_URL: process.env.TARGET_URL
 }
