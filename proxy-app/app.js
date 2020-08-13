@@ -20,4 +20,4 @@ app.all('/wd/hub*', async (req, res) => {
 })
 
 // Ignite Web server
-app.listen(PORT || 3000)
+app.listen(PORT)

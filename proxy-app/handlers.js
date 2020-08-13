@@ -19,11 +19,13 @@ async function createSession(req, res) {
     // Create real session
     const response = await proxyRequest(req)
     const body = JSON.parse(response.body)
-    // Update slot with session id and expiration time
-    const id = body.value.sessionId
+    // Extract session id for W3C or OSS protocols
+    const id = body.value.sessionId || body.sessionId
     if (id) {
+        // Update slot with session id and expiration time
         await storage.upgrade(ticketId, id)
     } else {
+        // Remove session
         await storage.remove(ticketId)
     }
     // Response to client
