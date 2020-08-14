@@ -1,5 +1,5 @@
 const storage = require('./storage')
-const {MAX_SESSIONS} = require('./settings')
+const {MAX_SESSIONS, CONTEXT_CONFIG} = require('./settings')
 
 const queue = []
 const instance = {}
@@ -36,7 +36,17 @@ instance.remove = function (ws) {
  */
 instance.available = async function* () {
     while (queue.length > 0 && await storage.slots() < MAX_SESSIONS) {
-        yield queue.shift()
+        let candidate;
+        for (const item of queue.filter(item => item.context)) {
+            const key = item.context
+            if (CONTEXT_CONFIG.has(key) && await storage.slots(key) < CONTEXT_CONFIG.get(key)) {
+                candidate = item
+                const index = queue.findIndex(i => i === item)
+                queue.splice(index, 1)
+                break
+            }
+        }
+        yield candidate || queue.shift()
     }
 }
 

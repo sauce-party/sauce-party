@@ -28,5 +28,24 @@ module.exports = {
     /**
      * Port that will be used by socket server
      */
-    WS_PORT: process.env.WS_PORT || 80
+    WS_PORT: process.env.WS_PORT || 80,
+
+    /**
+     * Defines contexts and number of related threads
+     *
+     * Assumes environment properties that match sauce-party.context pattern are passed
+     * Examples:
+     * sauce-party.context.a=1
+     * sauce-party.context.b=4
+     */
+    get CONTEXT_CONFIG() {
+        const store = new Map()
+        for (const entry in process.env) {
+            const match = entry.match('^sauce-party\.context\.(.+?)$')
+            if (match) {
+                store.set(match[1], process.env[entry])
+            }
+        }
+        return store
+    }
 }
