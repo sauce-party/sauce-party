@@ -7,5 +7,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    compile 'org.java-websocket:Java-WebSocket:1.5.1'
     testImplementation 'junit:junit:4.13'
 }
