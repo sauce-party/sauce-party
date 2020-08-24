@@ -7,6 +7,9 @@ import org.openqa.selenium.WebDriver;
 import java.net.URL;
 import java.util.function.BiFunction;
 
+/**
+ * Client used to request tickets from sauce-party server and build {@link WebDriver} instance
+ */
 public class SaucePartyClient<T extends WebDriver> {
 
     private final Settings settings;
@@ -16,7 +19,7 @@ public class SaucePartyClient<T extends WebDriver> {
     public SaucePartyClient(String host, BiFunction<URL, Capabilities, T> factory) {
         settings = new Settings(host);
         this.factory = factory;
-        socketQueue = new SocketQueue(settings.socket);
+        socketQueue = new SocketQueue(settings);
         try {
             if (!socketQueue.connectBlocking()) {
                 throw new IllegalStateException("Failed to connect to sauce party");

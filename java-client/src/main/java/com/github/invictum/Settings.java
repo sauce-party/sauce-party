@@ -8,6 +8,7 @@ public class Settings {
 
     final URL hub;
     final URI socket;
+    int heartBeatInterval = 60000;
 
     public Settings(String host) {
         try {
@@ -16,5 +17,10 @@ public class Settings {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Unable to build url from " + host);
         }
+    }
+
+    public Settings withHeatBeatInterval(int heartBeatInterval) {
+        this.heartBeatInterval = heartBeatInterval;
+        return this;
     }
 }
